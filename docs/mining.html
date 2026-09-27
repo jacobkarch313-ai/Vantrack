@@ -5,12 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mining Dashboard</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  body { font-family: -apple-system, Helvetica, Arial, sans-serif; background: #0b0e14; color: #e8ecf3; margin: 0; padding: 32px 24px; }
+  .card { max-width: 420px; margin: 40px auto; background: #141926; border-radius: 16px; padding: 28px 24px; }
+  h1 { font-size: 20px; margin: 0 0 12px; }
+  ol { margin: 0 0 20px; padding-left: 20px; line-height: 1.9; font-size: 16px; }
+  button { display: block; width: 100%; padding: 14px; font-size: 17px; font-weight: 600; color: #fff; background: #f7931a; border: none; border-radius: 12px; }
+</style>
 <script>
-window.location.replace("https://muse.ai/s/mining-dashboard-2-ub6jxsf9xf5hu");
+var DASHBOARD = "https://muse.ai/s/mining-dashboard-2-ub6jxsf9xf5hu";
+var isStandalone = window.navigator.standalone === true ||
+    (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+if (isStandalone) {
+  window.location.replace(DASHBOARD);
+}
+function preview() { window.location.replace(DASHBOARD); }
 </script>
 </head>
 <body>
-<p>Opening your mining dashboard...</p>
+<div class="card">
+  <h1>Mining Dashboard</h1>
+  <ol>
+    <li>Tap <b>Share</b> below</li>
+    <li>Tap <b>Add to Home Screen</b>, then <b>Add</b></li>
+    <li>Open the new icon from your Home Screen</li>
+  </ol>
+  <button onclick="preview()">Preview dashboard</button>
+</div>
 </body>
 </html>
