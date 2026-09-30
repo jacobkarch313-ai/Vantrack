@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VanTrack">
+<title>VanTrack</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e1117; --card: #1a1f2e; --card2: #222840;
+  --accent: #f0a500; --accent2: #e05c2a;
+  --text: #f0f2f8; --muted: #7a8099;
+  --green: #2ecc71; --red: #e74c3c; --border: #2e3450;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg); color: var(--text);
+  max-width: 480px; margin: 0 auto;
+  display: flex; flex-direction: column;
+}
+
+/* HEADER */
+.header {
+  background: linear-gradient(135deg, var(--card) 0%, #1e2540 100%);
+  padding: calc(var(--safe-top) + 14px) 20px 14px;
+  border-bottom: 2px solid var(--accent);
+  flex-shrink: 0;
+}
+.header-top { display: flex; justify-content: space-between; align-items: center; }
+.logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
+.logo span { color: var(--text); }
+.year-badge { background: var(--accent); color: #000; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 20px; letter-spacing: 1px; }
+
+/* TABS */
+.tabs {
+  display: flex; background: var(--bg);
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.tab {
+  flex: 1; padding: 11px 0; text-align: center; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.5px; color: var(--muted); cursor: pointer;
+  border-bottom: 3px solid transparent; transition: all 0.2s; text-transform: uppercase;
+}
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* SCROLLABLE CONTENT */
+.content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: calc(var(--safe-bot) + 20px); }
+
+/* PAGES */
+.page { display: none; padding: 16px; }
+.page.active { display: block; }
+
+/* SUMMARY CARDS */
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.summary-card { background: var(--card); border-radius: 12px; padding: 14px; border: 1px solid var(--border); }
+.summary-card.full { grid-column: 1/-1; }
+.summary-card .label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 4px; }
+.summary-card .value { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--accent); letter-spacing: 1px; }
+.summary-card .value.green { color: var(--green); }
+.summary-card .value.red { color: var(--red); }
+.summary-card .sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* FORMS */
+.form-card { background: var(--card); border-radius: 14px; padding: 18px; border: 1px solid var(--border); margin-bottom: 16px; }
+.form-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1px; color: var(--accent); margin-bottom: 16px; }
+.form-group { margin-bottom: 13px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); display: block; margin-bottom: 5px; }
+input, select, textarea {
+  width: 100%; background: var(--card2); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 16px; padding: 10px 12px; outline: none; transition: border-color 0.2s;
+  -webkit-appearance: none; appearance: none;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%237a8099' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+select option { background: #1a1f2e; }
+textarea { resize: none; height: 68px; font-size: 14px; }
+.platform-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.platform-btn {
+  background: var(--card2); border: 2px solid var(--border); border-radius: 8px;
+  padding: 10px 6px; text-align: center; cursor: pointer; font-size: 12px; font-weight: 600;
+  color: var(--muted); transition: all 0.15s; user-select: none;
+}
+.platform-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(240,165,0,0.1); }
+
+.btn-submit {
+  width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none; border-radius: 10px; color: #000; font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px; letter-spacing: 2px; padding: 14px; cursor: pointer; margin-top: 4px;
+  transition: transform 0.1s;
+}
+.btn-submit:active { transform: scale(0.98); }
+.btn-submit.red-btn { background: linear-gradient(135deg,#c0392b,#e74c3c); }
+
+/* ITEM CARDS */
+.section-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px; color: var(--muted); margin-bottom: 10px; }
+.rental-item { background: var(--card); border-radius: 12px; padding: 14px; border: 1px solid var(--border); margin-bottom: 10px; }
+.ri-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.ri-renter { font-weight: 600; font-size: 15px; margin-bottom: 2px; }
+.ri-date { font-size: 12px; color: var(--muted); }
+.ri-amount { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--green); }
+.ri-platform { font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 2px 8px; border-radius: 20px; background: rgba(240,165,0,0.15); color: var(--accent); display: inline-block; margin-top: 2px; }
+.ri-details { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; }
+.ri-detail { font-size: 12px; color: var(--muted); }
+.ri-detail span { color: var(--text); font-weight: 500; }
+.item-actions { display: flex; gap: 8px; margin-top: 10px; }
+.action-btn {
+  flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--border);
+  font-size: 12px; font-weight: 600; cursor: pointer; text-align: center;
+  background: var(--card2); color: var(--muted); transition: all 0.15s;
+}
+.action-btn.edit { color: var(--accent); border-color: rgba(240,165,0,0.3); }
+.action-btn.del { color: var(--red); border-color: rgba(231,76,60,0.3); }
+.action-btn:active { opacity: 0.7; }
+
+.expense-item { background: var(--card); border-radius: 12px; padding: 14px; border: 1px solid var(--border); margin-bottom: 10px; display: flex; flex-direction: column; }
+.ei-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.ei-cat { font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--accent2); text-transform: uppercase; margin-bottom: 2px; }
+.ei-desc { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+.ei-date { font-size: 12px; color: var(--muted); }
+.ei-amount { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--red); white-space: nowrap; margin-left: 8px; }
+
+/* HISTORY FILTER */
+.filter-row { display: flex; gap: 8px; margin-bottom: 14px; }
+.filter-row select { flex: 1; font-size: 14px; }
+
+/* TAX PAGE */
+.tax-section { margin-bottom: 14px; }
+.tax-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 11px 14px; background: var(--card); border-radius: 10px;
+  margin-bottom: 5px; border: 1px solid var(--border);
+}
+.tax-row .tr-label { font-size: 13px; color: var(--muted); flex: 1; padding-right: 8px; }
+.tax-row .tr-val { font-weight: 600; font-size: 15px; white-space: nowrap; }
+.tax-row .tr-val.green { color: var(--green); }
+.tax-row .tr-val.red { color: var(--red); }
+.tax-row.total { background: var(--card2); border-color: var(--accent); }
+.tax-row.total .tr-label { color: var(--text); font-weight: 600; }
+.tax-row.total .tr-val { font-family: 'Bebas Neue', sans-serif; font-size: 20px; }
+.tax-header { font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1px; color: var(--muted); margin: 14px 0 8px; }
+.export-btn {
+  width: 100%; background: var(--card2); border: 2px solid var(--accent);
+  border-radius: 10px; color: var(--accent); font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px; letter-spacing: 2px; padding: 13px; cursor: pointer; margin-top: 12px;
+}
+.export-btn:active { background: rgba(240,165,0,0.1); }
+
+/* EDIT MODAL */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+  z-index: 200; display: none; align-items: flex-end;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--card); width: 100%; max-height: 90vh;
+  border-radius: 20px 20px 0 0; padding: 20px 20px calc(var(--safe-bot) + 20px);
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; color: var(--accent); }
+.modal-close { background: var(--card2); border: none; color: var(--muted); font-size: 18px; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: calc(var(--safe-bot) + 20px); left: 50%;
+  transform: translateX(-50%) translateY(120px);
+  background: var(--green); color: #000; font-weight: 700; padding: 12px 24px;
+  border-radius: 30px; font-size: 14px; z-index: 999; transition: transform 0.3s; white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.error { background: var(--red); color: #fff; }
+
+.empty-state { text-align: center; color: var(--muted); padding: 40px 20px; font-size: 14px; line-height: 1.6; }
+.empty-state .es-icon { font-size: 40px; margin-bottom: 10px; }
+
+/* STORAGE STATUS */
+.storage-badge { font-size: 10px; color: var(--muted); text-align: center; padding: 4px; }
+.storage-badge.ok { color: var(--green); }
+.storage-badge.warn { color: var(--accent); }
+
+/* ITEM ACTION BUTTONS */
+.item-actions { display: flex; gap: 8px; margin-top: 12px; }
+.action-btn {
+  flex: 1; padding: 10px 8px; border-radius: 10px;
+  font-size: 13px; font-weight: 600; cursor: pointer; text-align: center;
+  transition: all 0.15s; user-select: none; border: none;
+}
+.action-btn.edit {
+  background: rgba(240,165,0,0.15); color: var(--accent);
+  border: 1.5px solid rgba(240,165,0,0.4);
+}
+.action-btn.del {
+  background: rgba(231,76,60,0.12); color: var(--red);
+  border: 1.5px solid rgba(231,76,60,0.35);
+}
+.action-btn:active { opacity: 0.6; transform: scale(0.97); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="logo">VAN<span>TRACK</span></div>
+      <div class="storage-badge" id="storage-status">Checking storage...</div>
+    </div>
+    <div class="year-badge" id="yearBadge">2026 TAX YEAR</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('dashboard')">📊 Summary</div>
+  <div class="tab" onclick="switchTab('log')">➕ Log</div>
+  <div class="tab" onclick="switchTab('history')">📋 History</div>
+  <div class="tab" onclick="switchTab('taxes')">🧾 Taxes</div>
+</div>
+
+<div class="content">
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div style="height:4px"></div>
+  <div class="summary-grid">
+    <div class="summary-card full">
+      <div class="label">Net Profit (After All Expenses)</div>
+      <div class="value green" id="s-profit">$0</div>
+      <div class="sub" id="s-profit-sub">0 rentals · 0 nights</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Gross Revenue</div>
+      <div class="value" id="s-revenue">$0</div>
+      <div class="sub">before fees</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Platform Fees</div>
+      <div class="value red" id="s-fees">$0</div>
+      <div class="sub">Outdoorsy / RVshare</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Total Expenses</div>
+      <div class="value red" id="s-expenses">$0</div>
+      <div class="sub" id="s-exp-count">0 items</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Avg / Night</div>
+      <div class="value" id="s-avg">$0</div>
+      <div class="sub">nightly rate</div>
+    </div>
+  </div>
+  <div class="section-title">Recent Rentals</div>
+  <div id="recent-list"></div>
+</div>
+
+<!-- LOG -->
+<div class="page" id="page-log">
+
+  <div class="form-card">
+    <div class="form-title">🚐 Log a Rental</div>
+    <div class="form-group">
+      <label>Platform</label>
+      <div class="platform-row">
+        <div class="platform-btn active" id="pb-outdoorsy" onclick="selectPlatform('Outdoorsy')">🏕️ Outdoorsy</div>
+        <div class="platform-btn" id="pb-rvshare" onclick="selectPlatform('RVshare')">🚌 RVshare</div>
+        <div class="platform-btn" id="pb-direct" onclick="selectPlatform('Direct')">🤝 Direct</div>
+        <div class="platform-btn" id="pb-other" onclick="selectPlatform('Other')">📦 Other</div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Check-in</label>
+        <input type="date" id="r-checkin">
+      </div>
+      <div class="form-group">
+        <label>Check-out</label>
+        <input type="date" id="r-checkout">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Renter Name</label>
+      <input type="text" id="r-renter" placeholder="e.g. John Smith" autocomplete="off">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Rental Income ($)</label>
+        <input type="number" id="r-income" placeholder="0.00" inputmode="decimal" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>Platform Fee ($)</label>
+        <input type="number" id="r-fee" placeholder="0.00" inputmode="decimal" step="0.01">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Miles Driven</label>
+        <input type="number" id="r-miles" placeholder="0" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label>Deposit Collected ($)</label>
+        <input type="number" id="r-deposit" placeholder="0.00" inputmode="decimal" step="0.01">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="r-notes" placeholder="Destination, condition notes..."></textarea>
+    </div>
+    <button class="btn-submit" onclick="saveRental()">SAVE RENTAL</button>
+  </div>
+
+  <div class="form-card">
+    <div class="form-title">💸 Log an Expense</div>
+    <div class="form-group">
+      <label>Category</label>
+      <select id="e-category">
+        <option value="Fuel">⛽ Fuel</option>
+        <option value="Maintenance">🔧 Maintenance / Repairs</option>
+        <option value="Insurance">🛡️ Insurance</option>
+        <option value="Registration">📋 Registration / DMV</option>
+        <option value="Cleaning">🧹 Cleaning / Detailing</option>
+        <option value="Supplies">📦 Supplies / Amenities</option>
+        <option value="Parking">🅿️ Parking / Storage</option>
+        <option value="Marketing">📣 Marketing / Photos</option>
+        <option value="Mileage">🚗 Mileage (IRS rate)</option>
+        <option value="Depreciation">📉 Depreciation</option>
+        <option value="Other">🗂️ Other</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="e-date">
+      </div>
+      <div class="form-group">
+        <label>Amount ($)</label>
+        <input type="number" id="e-amount" placeholder="0.00" inputmode="decimal" step="0.01">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <input type="text" id="e-desc" placeholder="e.g. Oil change at Jiffy Lube" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label>Vendor / Payee</label>
+      <input type="text" id="e-vendor" placeholder="e.g. Jiffy Lube, Amazon" autocomplete="off">
+    </div>
+    <button class="btn-submit red-btn" onclick="saveExpense()">SAVE EXPENSE</button>
+  </div>
+
+</div>
+
+<!-- HISTORY -->
+<div class="page" id="page-history">
+  <div class="filter-row">
+    <select id="filter-type" onchange="renderHistory()">
+      <option value="all">All Entries</option>
+      <option value="rentals">Rentals Only</option>
+      <option value="expenses">Expenses Only</option>
+    </select>
+    <select id="filter-month" onchange="renderHistory()">
+      <option value="all">All Months</option>
+    </select>
+  </div>
+  <div id="history-list"></div>
+</div>
+
+<!-- TAXES -->
+<div class="page" id="page-taxes">
+  <div class="form-card" style="padding:16px">
+    <div class="form-title" style="margin-bottom:12px">⚙️ Tax Settings</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Tax Year</label>
+        <select id="tax-year" onchange="updateTaxYear()">
+          <option value="2026">2026</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>IRS Mileage (¢/mi)</label>
+        <input type="number" id="irs-rate" value="70" inputmode="decimal" onchange="renderTaxes()">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Business Use % (if van is personal too)</label>
+      <input type="number" id="biz-pct" value="100" min="1" max="100" inputmode="numeric" onchange="renderTaxes()">
+    </div>
+  </div>
+  <div class="tax-header">📥 Income Summary</div>
+  <div class="tax-section" id="tax-income"></div>
+  <div class="tax-header">📤 Deductible Expenses</div>
+  <div class="tax-section" id="tax-deductions"></div>
+  <div class="tax-header">💰 Net Taxable Income</div>
+  <div class="tax-section" id="tax-net"></div>
+  <button class="export-btn" onclick="exportCSV()">⬇️ EXPORT CSV FOR ACCOUNTANT</button>
+</div>
+
+</div><!-- end .content -->
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Edit Rental</div>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STORAGE ─────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'vantrack_v2';
+let data = { rentals: [], expenses: [] };
+let storageMode = 'none';
+
+function detectStorage() {
+  // Try IndexedDB first (most reliable on iOS Home Screen apps)
+  if (window.indexedDB) {
+    storageMode = 'idb';
+    return initIDB();
+  } else {
+    storageMode = 'ls';
+    loadFromLS();
+    return Promise.resolve();
+  }
+}
+
+// ── IndexedDB ──
+let db = null;
+function initIDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('VanTrack', 1);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('store')) d.createObjectStore('store');
+    };
+    req.onsuccess = e => {
+      db = e.target.result;
+      idbGet(STORAGE_KEY).then(val => {
+        if (val) data = val;
+        resolve();
+      });
+    };
+    req.onerror = () => { storageMode = 'ls'; loadFromLS(); resolve(); };
+  });
+}
+function idbGet(key) {
+  return new Promise(res => {
+    const tx = db.transaction('store','readonly');
+    const req = tx.objectStore('store').get(key);
+    req.onsuccess = () => res(req.result || null);
+    req.onerror = () => res(null);
+  });
+}
+function idbSet(key, val) {
+  return new Promise(res => {
+    const tx = db.transaction('store','readwrite');
+    tx.objectStore('store').put(val, key);
+    tx.oncomplete = res; tx.onerror = res;
+  });
+}
+
+// ── LocalStorage fallback ──
+function loadFromLS() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) data = JSON.parse(raw);
+  } catch(e) {}
+}
+
+async function save() {
+  if (storageMode === 'idb' && db) {
+    await idbSet(STORAGE_KEY, data);
+  } else {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+  }
+}
+
+function updateStorageStatus() {
+  const el = document.getElementById('storage-status');
+  if (storageMode === 'idb') {
+    el.textContent = '✓ Data saves reliably on iPhone';
+    el.className = 'storage-badge ok';
+  } else if (storageMode === 'ls') {
+    el.textContent = '⚠ Using fallback storage — export CSV regularly';
+    el.className = 'storage-badge warn';
+  }
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function fmt(n) { return '$' + Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtShort(n) { return '$' + Math.round(n||0).toLocaleString(); }
+
+function showToast(msg, isError=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '') + ' show';
+  setTimeout(() => t.className = 'toast' + (isError ? ' error' : ''), 2500);
+}
+
+let selectedPlatform = 'Outdoorsy';
+function selectPlatform(p) {
+  selectedPlatform = p;
+  const map = { Outdoorsy:'outdoorsy', RVshare:'rvshare', Direct:'direct', Other:'other' };
+  document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('pb-' + map[p])?.classList.add('active');
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['dashboard','log','history','taxes'][i] === name);
+  });
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if (name==='dashboard') renderDashboard();
+  if (name==='history') renderHistory();
+  if (name==='taxes') renderTaxes();
+}
+
+// ─── SAVE RENTAL ─────────────────────────────────────────────────────────────
+async function saveRental() {
+  const cin = document.getElementById('r-checkin').value;
+  const cout = document.getElementById('r-checkout').value;
+  const income = parseFloat(document.getElementById('r-income').value) || 0;
+  if (!cin || !cout || !income) { showToast('Check-in, check-out & income required', true); return; }
+  const nights = Math.max(1, Math.round((new Date(cout) - new Date(cin)) / 86400000));
+  const rental = {
+    id: Date.now(), type: 'rental',
+    platform: selectedPlatform,
+    checkin: cin, checkout: cout, nights,
+    renter: document.getElementById('r-renter').value || 'Guest',
+    income, fee: parseFloat(document.getElementById('r-fee').value) || 0,
+    miles: parseFloat(document.getElementById('r-miles').value) || 0,
+    deposit: parseFloat(document.getElementById('r-deposit').value) || 0,
+    notes: document.getElementById('r-notes').value,
+  };
+  data.rentals.push(rental);
+  await save();
+  ['r-checkin','r-checkout','r-renter','r-income','r-fee','r-miles','r-deposit','r-notes'].forEach(id => { document.getElementById(id).value = ''; });
+  setDefaultDates();
+  showToast('✅ Rental saved!');
+  renderDashboard();
+}
+
+// ─── SAVE EXPENSE ─────────────────────────────────────────────────────────────
+async function saveExpense() {
+  const amount = parseFloat(document.getElementById('e-amount').value) || 0;
+  const date = document.getElementById('e-date').value;
+  if (!amount || !date) { showToast('Date & amount required', true); return; }
+  const expense = {
+    id: Date.now(), type: 'expense',
+    category: document.getElementById('e-category').value,
+    date, amount,
+    desc: document.getElementById('e-desc').value || 'Expense',
+    vendor: document.getElementById('e-vendor').value,
+  };
+  data.expenses.push(expense);
+  await save();
+  ['e-amount','e-desc','e-vendor'].forEach(id => { document.getElementById(id).value = ''; });
+  showToast('✅ Expense saved!');
+}
+
+// ─── DELETE ───────────────────────────────────────────────────────────────────
+async function deleteItem(type, id) {
+  if (!confirm('Delete this entry?')) return;
+  if (type==='rental') data.rentals = data.rentals.filter(r => r.id !== id);
+  else data.expenses = data.expenses.filter(e => e.id !== id);
+  await save();
+  renderDashboard(); renderHistory(); renderTaxes();
+  showToast('Deleted');
+}
+
+// ─── EDIT MODAL ───────────────────────────────────────────────────────────────
+function closeModal(e) { if (e.target === document.getElementById('modal-overlay')) closeModalDirect(); }
+function closeModalDirect() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function editRental(id) {
+  const r = data.rentals.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('modal-title').textContent = 'Edit Rental';
+  document.getElementById('modal-body').innerHTML = `
+    <div class="form-group">
+      <label>Platform</label>
+      <select id="m-platform">
+        <option ${r.platform==='Outdoorsy'?'selected':''}>Outdoorsy</option>
+        <option ${r.platform==='RVshare'?'selected':''}>RVshare</option>
+        <option ${r.platform==='Direct'?'selected':''}>Direct</option>
+        <option ${r.platform==='Other'?'selected':''}>Other</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Check-in</label><input type="date" id="m-cin" value="${r.checkin}"></div>
+      <div class="form-group"><label>Check-out</label><input type="date" id="m-cout" value="${r.checkout}"></div>
+    </div>
+    <div class="form-group"><label>Renter Name</label><input type="text" id="m-renter" value="${r.renter}"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Income ($)</label><input type="number" id="m-income" value="${r.income}" inputmode="decimal" step="0.01"></div>
+      <div class="form-group"><label>Platform Fee ($)</label><input type="number" id="m-fee" value="${r.fee}" inputmode="decimal" step="0.01"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Miles</label><input type="number" id="m-miles" value="${r.miles}" inputmode="numeric"></div>
+      <div class="form-group"><label>Deposit ($)</label><input type="number" id="m-deposit" value="${r.deposit}" inputmode="decimal" step="0.01"></div>
+    </div>
+    <div class="form-group"><label>Notes</label><textarea id="m-notes">${r.notes||''}</textarea></div>
+    <button class="btn-submit" onclick="updateRental(${id})">SAVE CHANGES</button>
+    <div style="height:8px"></div>
+    <button class="btn-submit red-btn" onclick="deleteItem('rental',${id});closeModalDirect()">DELETE RENTAL</button>
+  `;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+async function updateRental(id) {
+  const cin = document.getElementById('m-cin').value;
+  const cout = document.getElementById('m-cout').value;
+  const income = parseFloat(document.getElementById('m-income').value) || 0;
+  if (!cin || !cout || !income) { showToast('Required fields missing', true); return; }
+  const nights = Math.max(1, Math.round((new Date(cout) - new Date(cin)) / 86400000));
+  const idx = data.rentals.findIndex(r => r.id === id);
+  data.rentals[idx] = {
+    ...data.rentals[idx],
+    platform: document.getElementById('m-platform').value,
+    checkin: cin, checkout: cout, nights,
+    renter: document.getElementById('m-renter').value || 'Guest',
+    income, fee: parseFloat(document.getElementById('m-fee').value) || 0,
+    miles: parseFloat(document.getElementById('m-miles').value) || 0,
+    deposit: parseFloat(document.getElementById('m-deposit').value) || 0,
+    notes: document.getElementById('m-notes').value,
+  };
+  await save();
+  closeModalDirect();
+  renderDashboard(); renderHistory(); renderTaxes();
+  showToast('✅ Rental updated!');
+}
+
+function editExpense(id) {
+  const e = data.expenses.find(x => x.id === id);
+  if (!e) return;
+  const cats = ['Fuel','Maintenance','Insurance','Registration','Cleaning','Supplies','Parking','Marketing','Mileage','Depreciation','Other'];
+  document.getElementById('modal-title').textContent = 'Edit Expense';
+  document.getElementById('modal-body').innerHTML = `
+    <div class="form-group">
+      <label>Category</label>
+      <select id="m-ecat">
+        ${cats.map(c=>`<option ${c===e.category?'selected':''}>${c}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Date</label><input type="date" id="m-edate" value="${e.date}"></div>
+      <div class="form-group"><label>Amount ($)</label><input type="number" id="m-eamount" value="${e.amount}" inputmode="decimal" step="0.01"></div>
+    </div>
+    <div class="form-group"><label>Description</label><input type="text" id="m-edesc" value="${e.desc}"></div>
+    <div class="form-group"><label>Vendor</label><input type="text" id="m-evendor" value="${e.vendor||''}"></div>
+    <button class="btn-submit" onclick="updateExpense(${id})">SAVE CHANGES</button>
+    <div style="height:8px"></div>
+    <button class="btn-submit red-btn" onclick="deleteItem('expense',${id});closeModalDirect()">DELETE EXPENSE</button>
+  `;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+async function updateExpense(id) {
+  const amount = parseFloat(document.getElementById('m-eamount').value) || 0;
+  const date = document.getElementById('m-edate').value;
+  if (!amount || !date) { showToast('Required fields missing', true); return; }
+  const idx = data.expenses.findIndex(e => e.id === id);
+  data.expenses[idx] = {
+    ...data.expenses[idx],
+    category: document.getElementById('m-ecat').value,
+    date, amount,
+    desc: document.getElementById('m-edesc').value || 'Expense',
+    vendor: document.getElementById('m-evendor').value,
+  };
+  await save();
+  closeModalDirect();
+  renderDashboard(); renderHistory(); renderTaxes();
+  showToast('✅ Expense updated!');
+}
+
+// ─── RENDER DASHBOARD ─────────────────────────────────────────────────────────
+function renderDashboard() {
+  const { rentals, expenses } = data;
+  const totalIncome = rentals.reduce((s,r)=>s+r.income,0);
+  const totalFees = rentals.reduce((s,r)=>s+r.fee,0);
+  const totalExp = expenses.reduce((s,e)=>s+e.amount,0);
+  const nights = rentals.reduce((s,r)=>s+r.nights,0);
+  const profit = totalIncome - totalFees - totalExp;
+
+  document.getElementById('s-revenue').textContent = fmtShort(totalIncome);
+  document.getElementById('s-fees').textContent = fmtShort(totalFees);
+  document.getElementById('s-expenses').textContent = fmtShort(totalExp);
+  document.getElementById('s-profit').textContent = fmtShort(profit);
+  document.getElementById('s-profit-sub').textContent = `${rentals.length} rentals · ${nights} nights`;
+  document.getElementById('s-exp-count').textContent = `${expenses.length} items`;
+  document.getElementById('s-avg').textContent = nights > 0 ? fmtShort(totalIncome/nights) : '$0';
+
+  const recent = [...rentals].sort((a,b)=>new Date(b.checkin)-new Date(a.checkin)).slice(0,3);
+  const list = document.getElementById('recent-list');
+  if (!recent.length) {
+    list.innerHTML = `<div class="empty-state"><div class="es-icon">🚐</div>No rentals yet.<br>Tap <b>Log</b> to add your first rental!</div>`;
+    return;
+  }
+  list.innerHTML = recent.map(r => rentalCard(r)).join('');
+}
+
+function rentalCard(r) {
+  return `<div class="rental-item">
+    <div class="ri-top">
+      <div>
+        <div class="ri-renter">${r.renter}</div>
+        <div class="ri-date">${r.checkin} → ${r.checkout} · ${r.nights} night${r.nights!==1?'s':''}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="ri-amount">${fmt(r.income)}</div>
+        <div class="ri-platform">${r.platform}</div>
+      </div>
+    </div>
+    <div class="ri-details">
+      <div class="ri-detail">Fee: <span>${fmt(r.fee)}</span></div>
+      <div class="ri-detail">Net: <span>${fmt(r.income-r.fee)}</span></div>
+      ${r.miles?`<div class="ri-detail">Miles: <span>${r.miles}</span></div>`:''}
+      ${r.notes?`<div class="ri-detail" style="width:100%;margin-top:2px">📝 <span>${r.notes}</span></div>`:''}
+    </div>
+    <div class="item-actions">
+      <div class="action-btn edit" onclick="editRental(${r.id})">✏️ Edit</div>
+      <div class="action-btn del" onclick="deleteItem('rental',${r.id})">🗑 Delete</div>
+    </div>
+  </div>`;
+}
+
+function expenseCard(e) {
+  return `<div class="expense-item">
+    <div class="ei-top">
+      <div>
+        <div class="ei-cat">${e.category}</div>
+        <div class="ei-desc">${e.desc}</div>
+        <div class="ei-date">${e.date}${e.vendor?' · '+e.vendor:''}</div>
+      </div>
+      <div class="ei-amount">${fmt(e.amount)}</div>
+    </div>
+    <div class="item-actions">
+      <div class="action-btn edit" onclick="editExpense(${e.id})">✏️ Edit</div>
+      <div class="action-btn del" onclick="deleteItem('expense',${e.id})">🗑 Delete</div>
+    </div>
+  </div>`;
+}
+
+// ─── RENDER HISTORY ───────────────────────────────────────────────────────────
+function renderHistory() {
+  const filterType = document.getElementById('filter-type').value;
+  const monthSel = document.getElementById('filter-month');
+  const curMonth = monthSel.value;
+
+  const allMonths = new Set();
+  data.rentals.forEach(r => allMonths.add(r.checkin.slice(0,7)));
+  data.expenses.forEach(e => allMonths.add(e.date.slice(0,7)));
+  monthSel.innerHTML = '<option value="all">All Months</option>' +
+    [...allMonths].sort().reverse().map(m =>
+      `<option value="${m}" ${m===curMonth?'selected':''}>${new Date(m+'-15').toLocaleString('default',{month:'long',year:'numeric'})}</option>`
+    ).join('');
+
+  let rentals = filterType==='expenses' ? [] : data.rentals;
+  let expenses = filterType==='rentals' ? [] : data.expenses;
+  if (curMonth !== 'all') {
+    rentals = rentals.filter(r => r.checkin.startsWith(curMonth));
+    expenses = expenses.filter(e => e.date.startsWith(curMonth));
+  }
+
+  const all = [
+    ...rentals.map(r => ({...r, sortDate: r.checkin})),
+    ...expenses.map(e => ({...e, sortDate: e.date}))
+  ].sort((a,b) => new Date(b.sortDate) - new Date(a.sortDate));
+
+  const list = document.getElementById('history-list');
+  if (!all.length) {
+    list.innerHTML = `<div class="empty-state"><div class="es-icon">📋</div>No entries found.</div>`;
+    return;
+  }
+  list.innerHTML = all.map(item => item.type==='rental' ? rentalCard(item) : expenseCard(item)).join('');
+}
+
+// ─── RENDER TAXES ─────────────────────────────────────────────────────────────
+function updateTaxYear() {
+  document.getElementById('yearBadge').textContent = document.getElementById('tax-year').value + ' TAX YEAR';
+  renderTaxes();
+}
+
+function renderTaxes() {
+  const yr = document.getElementById('tax-year').value;
+  const irsRate = (parseFloat(document.getElementById('irs-rate').value)||70) / 100;
+  const bizPct = (parseFloat(document.getElementById('biz-pct').value)||100) / 100;
+
+  const rentals = data.rentals.filter(r => r.checkin.startsWith(yr));
+  const expenses = data.expenses.filter(e => e.date.startsWith(yr));
+
+  const grossIncome = rentals.reduce((s,r)=>s+r.income,0);
+  const platformFees = rentals.reduce((s,r)=>s+r.fee,0);
+  const netIncome = grossIncome - platformFees;
+  const totalMiles = rentals.reduce((s,r)=>s+r.miles,0);
+
+  const expByCat = {};
+  expenses.forEach(e => { expByCat[e.category] = (expByCat[e.category]||0) + e.amount; });
+  const rawExpenses = expenses.reduce((s,e)=>s+e.amount,0);
+  const mileageDeduction = totalMiles * irsRate * bizPct;
+  const totalDeductions = rawExpenses * bizPct + mileageDeduction;
+  const taxableIncome = netIncome - totalDeductions;
+
+  document.getElementById('tax-income').innerHTML = `
+    <div class="tax-row"><div class="tr-label">Gross Rental Income</div><div class="tr-val green">${fmt(grossIncome)}</div></div>
+    <div class="tax-row"><div class="tr-label">Platform Fees Paid</div><div class="tr-val red">(${fmt(platformFees)})</div></div>
+    <div class="tax-row total"><div class="tr-label">Net Rental Income</div><div class="tr-val green">${fmt(netIncome)}</div></div>
+    <div class="tax-row"><div class="tr-label">Total Rentals</div><div class="tr-val">${rentals.length}</div></div>
+    <div class="tax-row"><div class="tr-label">Nights Rented</div><div class="tr-val">${rentals.reduce((s,r)=>s+r.nights,0)}</div></div>`;
+
+  const catRows = Object.entries(expByCat)
+    .map(([k,v]) => `<div class="tax-row"><div class="tr-label">${k}</div><div class="tr-val red">${fmt(v*bizPct)}</div></div>`)
+    .join('');
+
+  document.getElementById('tax-deductions').innerHTML = (catRows || '<div class="tax-row"><div class="tr-label" style="color:var(--muted)">No expenses logged yet</div><div class="tr-val">—</div></div>') + `
+    <div class="tax-row"><div class="tr-label">Mileage (${totalMiles} mi @ $${irsRate.toFixed(2)}/mi)</div><div class="tr-val red">${fmt(mileageDeduction)}</div></div>
+    <div class="tax-row total"><div class="tr-label">Total Deductions</div><div class="tr-val red">${fmt(totalDeductions)}</div></div>`;
+
+  document.getElementById('tax-net').innerHTML = `
+    <div class="tax-row total"><div class="tr-label">Est. Taxable Income</div><div class="tr-val ${taxableIncome<0?'red':'green'}">${fmt(taxableIncome)}</div></div>
+    <div class="tax-row"><div class="tr-label">Self-Employment Tax (~15.3%)</div><div class="tr-val red">${taxableIncome>0?fmt(taxableIncome*0.153):'$0.00'}</div></div>
+    <div style="font-size:11px;color:var(--muted);padding:8px 4px 0">⚠️ Estimates only — consult a tax professional.</div>`;
+}
+
+// ─── EXPORT CSV ───────────────────────────────────────────────────────────────
+function exportCSV() {
+  const yr = document.getElementById('tax-year').value;
+  const rentals = data.rentals.filter(r => r.checkin.startsWith(yr));
+  const expenses = data.expenses.filter(e => e.date.startsWith(yr));
+
+  let csv = 'TYPE,DATE,RENTER/DESC,PLATFORM,NIGHTS,GROSS_INCOME,PLATFORM_FEE,NET_INCOME,MILES,CATEGORY,VENDOR,NOTES\n';
+  rentals.forEach(r => {
+    csv += `Rental,"${r.checkin}","${r.renter}","${r.platform}",${r.nights},${r.income.toFixed(2)},${r.fee.toFixed(2)},${(r.income-r.fee).toFixed(2)},${r.miles},,,"${(r.notes||'').replace(/"/g,"'")}"\n`;
+  });
+  expenses.forEach(e => {
+    csv += `Expense,"${e.date}","${e.desc}",,,,,,,"${e.category}","${e.vendor||''}",\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `VanTrack-${yr}-taxes.csv`;
+  a.click();
+  showToast('📤 CSV exported!');
+}
+
+// ─── DEFAULT DATES ────────────────────────────────────────────────────────────
+function setDefaultDates() {
+  const today = new Date().toISOString().split('T')[0];
+  const cinEl = document.getElementById('r-checkin');
+  const coutEl = document.getElementById('r-checkout');
+  const edateEl = document.getElementById('e-date');
+  if (cinEl && !cinEl.value) cinEl.value = today;
+  if (coutEl && !coutEl.value) coutEl.value = today;
+  if (edateEl && !edateEl.value) edateEl.value = today;
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+detectStorage().then(() => {
+  updateStorageStatus();
+  setDefaultDates();
+  renderDashboard();
+});
+</script>
+</body>
+</html>
